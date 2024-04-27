@@ -1659,6 +1659,23 @@ func (h *fsmHandler) sendMessageloop(ctx context.Context, wg *sync.WaitGroup) er
 			table.UpdatePathAttrs2ByteAs(m.Body.(*bgp.BGPUpdate))
 			table.UpdatePathAggregator2ByteAs(m.Body.(*bgp.BGPUpdate))
 		}
+
+		// RFC8538 defines a Hard Reset notification subcode which
+		// indicates that the BGP speaker wants to reset the session
+		// without triggering graceful restart procedures. Here we map
+		// notification subcodes to the Hard Reset subcode following
+		// the RFC8538 suggestion.
+		//
+		// We check Status instead of Config because RFC8538 states
+		// that A BGP speaker SHOULD NOT send a Hard Reset to a peer
+		// from which it has not received the "N" bit.
+		if fsm.pConf.GracefulRestart.State.NotificationEnabled && m.Header.Type == bgp.BGP_MSG_NOTIFICATION {
+			body := m.Body.(*bgp.BGPNotification)
+			if body.ErrorCode == bgp.BGP_ERROR_CEASE && bgp.ShouldHardReset(body.ErrorSubcode, false) {
+				body.ErrorSubcode = bgp.BGP_ERROR_SUB_HARD_RESET
+			}
+		}
+
 		b, err := m.Serialize(h.fsm.marshallingOptions)
 		fsm.lock.RUnlock()
 		if err != nil {
