@@ -1674,7 +1674,7 @@ func (h *fsmHandler) sendMessageloop(ctx context.Context, wg *sync.WaitGroup) er
 				"Topic":   "Peer",
 				"Key":     fsm.pConf.State.NeighborAddress,
 				"State":   fsm.state.String(),
-				"Enabled": fsm.pConf.GracefulRestart.State.Enabled})
+				"Enabled": fsm.pConf.GracefulRestart.State.NotificationEnabled})
 		if fsm.pConf.GracefulRestart.State.NotificationEnabled && m.Header.Type == bgp.BGP_MSG_NOTIFICATION {
 			if body := m.Body.(*bgp.BGPNotification); body.ErrorCode == bgp.BGP_ERROR_CEASE && bgp.ShouldHardReset(body.ErrorSubcode, false) {
 				fsm.logger.Debug("sending hard reset notification",
