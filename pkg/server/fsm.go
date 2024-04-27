@@ -1669,7 +1669,7 @@ func (h *fsmHandler) sendMessageloop(ctx context.Context, wg *sync.WaitGroup) er
 		// We check Status instead of Config because RFC8538 states
 		// that A BGP speaker SHOULD NOT send a Hard Reset to a peer
 		// from which it has not received the "N" bit.
-		fsm.logger.Debug("hard reset?",
+		fsm.logger.Debug("hard reset???",
 			log.Fields{
 				"Topic":   "Peer",
 				"Key":     fsm.pConf.State.NeighborAddress,
