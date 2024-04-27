@@ -1669,9 +1669,20 @@ func (h *fsmHandler) sendMessageloop(ctx context.Context, wg *sync.WaitGroup) er
 		// We check Status instead of Config because RFC8538 states
 		// that A BGP speaker SHOULD NOT send a Hard Reset to a peer
 		// from which it has not received the "N" bit.
+		fsm.logger.Debug("hard reset?",
+			log.Fields{
+				"Topic":   "Peer",
+				"Key":     fsm.pConf.State.NeighborAddress,
+				"State":   fsm.state.String(),
+				"Enabled": fsm.pConf.GracefulRestart.State.Enabled})
 		if fsm.pConf.GracefulRestart.State.NotificationEnabled && m.Header.Type == bgp.BGP_MSG_NOTIFICATION {
-			body := m.Body.(*bgp.BGPNotification)
-			if body.ErrorCode == bgp.BGP_ERROR_CEASE && bgp.ShouldHardReset(body.ErrorSubcode, false) {
+			if body := m.Body.(*bgp.BGPNotification); body.ErrorCode == bgp.BGP_ERROR_CEASE && bgp.ShouldHardReset(body.ErrorSubcode, false) {
+				fsm.logger.Debug("sending hard reset notification",
+					log.Fields{
+						"Topic": "Peer",
+						"Key":   fsm.pConf.State.NeighborAddress,
+						"State": fsm.state.String(),
+						"Data":  m})
 				body.ErrorSubcode = bgp.BGP_ERROR_SUB_HARD_RESET
 			}
 		}
