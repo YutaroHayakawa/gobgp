@@ -2581,7 +2581,7 @@ func (s *BgpServer) StartBgp(ctx context.Context, r *api.StartBgpRequest) error 
 		if c.Config.Port > 0 {
 			acceptCh := make(chan net.Conn, 32)
 			for _, addr := range c.Config.LocalAddressList {
-				l, err := netutils.NewTCPListener(s.logger, addr.String(), uint32(c.Config.Port), g.BindToDevice, acceptCh)
+				l, err := netutils.NewTCPListener(s.logger, addr.String(), uint32(c.Config.Port), c.Config.BindToDevice, acceptCh)
 				if err != nil {
 					return err
 				}
@@ -3225,6 +3225,7 @@ func (s *BgpServer) GetBgp(ctx context.Context, r *api.GetBgpRequest) (rsp *api.
 				ListenPort:       g.Config.Port,
 				ListenAddresses:  l,
 				UseMultiplePaths: g.UseMultiplePaths.Config.Enabled,
+				BindToDevice:     g.Config.BindToDevice,
 			},
 		}
 		return nil
